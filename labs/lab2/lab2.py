@@ -36,7 +36,6 @@ P3 = np.array([-1, -1, -1,  1,  1,
 clean = np.array([P1, P2, P3])
 
 # Noisy patterns
-# noisy = [np.copy(P1), np.copy(P2), np.copy(P3)]
 noisy = np.copy(clean)
 for index in noisy:
     for i in range(3):
@@ -50,28 +49,25 @@ for index in noisy:
 # def apply_hebbian_learning_rule(clean_patterns, noisy_patterns):
 
 # Correct orientation of Ts
-t_array = np.array([Tx.T for Tx in clean])
+t_array = np.array(clean).T
 
 # Correct orientation of Ps
-p_array = [normalize([Px]).T for Px in clean]
+p_list = [normalize([Px])[0] for Px in clean]
+p_array = np.array(p_list).T
 
 # Correct orientation of noisy Ps
-test_p_array = [normalize([tPx]).T for tPx in noisy]
+test_p_list = [normalize([tPx])[0] for tPx in noisy]
+test_p_array = np.array(test_p_list).T
 
-p_array = np.array(p_array)
-test_p_array = np.array(test_p_array)
-
-print(t_array.shape)
-print(p_array.shape)
-print(test_p_array.shape)
+# print(f"t_array shape {t_array.shape}")
+# print(f"p_array shape {p_array.shape}")
+# print(f"test_p_array shape {test_p_array.shape}")
 
 # Calculate weight matrix
-# make this a loop
-# weight_matrix = np.dot(t_array, p_array.T)
-# weight_matrix = np.matmul(t_array[0], p_array[0].T) + np.matmul(t_array[1], p_array[1].T) + np.matmul(t_array[2], p_array[2].T)
+weight_matrix = np.matmul(t_array, p_array.T)
 
-# Test hebbian learning rule. Transpose the final output to work nicely with numpy
-# hebbian_output = [np.matmul(weight_matrix, test_p).T for test_p in test_p_array]
+# Test hebbian learning rule ------------ Something is wrong here!!!!!!
+hebbian_output = [np.matmul(weight_matrix, test_p) for test_p in test_p_array.T]
 
 
 # """ Pseudo Inverse Learning Rule """
@@ -117,13 +113,13 @@ plt.imshow(noisy[1].reshape(6, 5))
 fig.add_subplot(rows, cols, 6)
 plt.imshow(noisy[2].reshape(6, 5))
 
-# # Add all hebbian tests to figure, reshape them to look correct
-# fig.add_subplot(rows, cols, 7)
-# plt.imshow(hebbian_output[0].reshape(6, 5))
-# fig.add_subplot(rows, cols, 8)
-# plt.imshow(hebbian_output[1].reshape(6, 5))
-# fig.add_subplot(rows, cols, 9)
-# plt.imshow(hebbian_output[2].reshape(6, 5))
+# Add all hebbian tests to figure, reshape them to look correct
+fig.add_subplot(rows, cols, 7)
+plt.imshow(hebbian_output[0].reshape(6, 5))
+fig.add_subplot(rows, cols, 8)
+plt.imshow(hebbian_output[1].reshape(6, 5))
+fig.add_subplot(rows, cols, 9)
+plt.imshow(hebbian_output[2].reshape(6, 5))
 
 plt.show()
 
