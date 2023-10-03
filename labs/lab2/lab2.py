@@ -42,7 +42,9 @@ for index in noisy:
         flip_pixel = randint(0, 29)
         index[flip_pixel] *= -1
 
+
 """ Because of the numpy arrays, transposed is actually the correct orientation """
+
 
 """ Hebbian Learning Rule """
 # make this a function for the next part
@@ -59,34 +61,82 @@ p_array = np.array(p_list).T
 test_p_list = [normalize([tPx])[0] for tPx in noisy]
 test_p_array = np.array(test_p_list).T
 
-# print(f"t_array shape {t_array.shape}")
-# print(f"p_array shape {p_array.shape}")
-# print(f"test_p_array shape {test_p_array.shape}")
-
 # Calculate weight matrix
 weight_matrix = np.matmul(t_array, p_array.T)
 
-# Test hebbian learning rule ------------ Something is wrong here!!!!!!
-hebbian_output = [np.matmul(weight_matrix, test_p) for test_p in test_p_array.T]
+# Test hebbian learning rule
+hebbian_output = [np.matmul(weight_matrix, test_p.T) for test_p in test_p_array.T]
 
 
-# """ Pseudo Inverse Learning Rule """
-# # make this a function for the next part
-# # def apply_pseudo_inverse_learning_rule(clean_patterns, noisy_patterns):
+""" Pseudo Inverse Learning Rule """
+# make this a function for the next part
+# def apply_pseudo_inverse_learning_rule(clean_patterns, noisy_patterns):
 
-# # Correct orientation of noisy Ps
-# test_p_array = [normalize(tPx).T for tPx in noisy]
+# Correct orientation of Ts
+t_array = np.array(clean).T
 
-# # Input matrix
-# input_matrix = np.array([clean])
+# Correct orientation of Ps
+p_list = [normalize([Px])[0] for Px in clean]
+p_array = np.array(p_list).T
 
-# # Calculate pseudo inverse matrix
-# pseudo_inverse = np.linalg.pinv(input_matrix)
-# print(f"Shape of PI: {pseudo_inverse.shape}")
+# Correct orientation of noisy Ps
+test_p_list = [normalize([tPx])[0] for tPx in noisy]
+test_p_array = np.array(test_p_list).T
 
-# # Calculate weight matrix
-# weight_matrix = np.matmul(input_matrix, pseudo_inverse)
-# print(f"Shape of weight: {weight_matrix.shape}")
+pseudo_inverse_p = np.linalg.pinv(p_array)
+
+# Calculate weight matrix
+weight_matrix = np.matmul(t_array, pseudo_inverse_p)
+
+# Test pseudo inverse learning rule
+pseudo_inverse_output = [np.matmul(weight_matrix, test_p.T) for test_p in test_p_array.T]
+
+
+""" Printing """
+
+# Hebbian correlation coefficient table
+
+h_corr11 = pearsonr(clean[0], hebbian_output[0]).statistic
+h_corr21 = pearsonr(clean[1], hebbian_output[0]).statistic
+h_corr31 = pearsonr(clean[2], hebbian_output[0]).statistic
+
+h_corr12 = pearsonr(clean[0], hebbian_output[1]).statistic
+h_corr22 = pearsonr(clean[1], hebbian_output[1]).statistic
+h_corr32 = pearsonr(clean[2], hebbian_output[1]).statistic
+
+h_corr13 = pearsonr(clean[0], hebbian_output[2]).statistic
+h_corr23 = pearsonr(clean[1], hebbian_output[2]).statistic
+h_corr33 = pearsonr(clean[2], hebbian_output[2]).statistic
+
+hebbian_table = PrettyTable()
+hebbian_table.field_names = ["", "Output 1", "Output 2", "Output 3"]
+hebbian_table.add_row(["Pattern 1", h_corr11, h_corr12, h_corr13])
+hebbian_table.add_row(["Pattern 2", h_corr21, h_corr22, h_corr23])
+hebbian_table.add_row(["Pattern 3", h_corr31, h_corr32, h_corr33])
+
+print(hebbian_table)
+
+# Pseudo inverse correlation coefficient table
+
+pi_corr11 = pearsonr(clean[0], pseudo_inverse_output[0]).statistic
+pi_corr21 = pearsonr(clean[1], pseudo_inverse_output[0]).statistic
+pi_corr31 = pearsonr(clean[2], pseudo_inverse_output[0]).statistic
+
+pi_corr12 = pearsonr(clean[0], pseudo_inverse_output[1]).statistic
+pi_corr22 = pearsonr(clean[1], pseudo_inverse_output[1]).statistic
+pi_corr32 = pearsonr(clean[2], pseudo_inverse_output[1]).statistic
+
+pi_corr13 = pearsonr(clean[0], pseudo_inverse_output[2]).statistic
+pi_corr23 = pearsonr(clean[1], pseudo_inverse_output[2]).statistic
+pi_corr33 = pearsonr(clean[2], pseudo_inverse_output[2]).statistic
+
+pseudo_inverse_table = PrettyTable()
+pseudo_inverse_table.field_names = ["", "Output 1", "Output 2", "Output 3"]
+pseudo_inverse_table.add_row(["Pattern 1", pi_corr11, pi_corr12, pi_corr13])
+pseudo_inverse_table.add_row(["Pattern 2", pi_corr21, pi_corr22, pi_corr23])
+pseudo_inverse_table.add_row(["Pattern 3", pi_corr31, pi_corr32, pi_corr33])
+
+print(pseudo_inverse_table)
 
 
 """ Plotting """
@@ -105,34 +155,20 @@ plt.imshow(clean[1].reshape(6, 5))
 fig.add_subplot(rows, cols, 3)
 plt.imshow(clean[2].reshape(6, 5))
 
-# Add all noisy inputs to figure, reshape them to look correct
-fig.add_subplot(rows, cols, 4)
-plt.imshow(noisy[0].reshape(6, 5))
-fig.add_subplot(rows, cols, 5)
-plt.imshow(noisy[1].reshape(6, 5))
-fig.add_subplot(rows, cols, 6)
-plt.imshow(noisy[2].reshape(6, 5))
-
 # Add all hebbian tests to figure, reshape them to look correct
-fig.add_subplot(rows, cols, 7)
+fig.add_subplot(rows, cols, 4)
 plt.imshow(hebbian_output[0].reshape(6, 5))
-fig.add_subplot(rows, cols, 8)
+fig.add_subplot(rows, cols, 5)
 plt.imshow(hebbian_output[1].reshape(6, 5))
-fig.add_subplot(rows, cols, 9)
+fig.add_subplot(rows, cols, 6)
 plt.imshow(hebbian_output[2].reshape(6, 5))
 
+# Add all pseudo inverse tests to figure, reshape them to look correct
+fig.add_subplot(rows, cols, 7)
+plt.imshow(pseudo_inverse_output[0].reshape(6, 5))
+fig.add_subplot(rows, cols, 8)
+plt.imshow(pseudo_inverse_output[1].reshape(6, 5))
+fig.add_subplot(rows, cols, 9)
+plt.imshow(pseudo_inverse_output[2].reshape(6, 5))
+
 plt.show()
-
-# # """ Printing """
-
-# # # P1_Hebbian = pearsonr(clean[0][0], hebbian_output[0][0])
-# # # P2_Hebbian = pearsonr(clean[1][0], hebbian_output[1][0])
-# # # P3_Hebbian = pearsonr(clean[2][0], hebbian_output[2][0])
-
-# # # correlation_coefficient_table = PrettyTable()
-# # # correlation_coefficient_table.field_names = ["Pattern", "Hebbian", "Pseudo Inverse"]
-# # # correlation_coefficient_table.add_row(["Gridwise 0 (P1)", P1_Hebbian.statistic, -1])
-# # # correlation_coefficient_table.add_row(["Gridwise 1 (P2)", P2_Hebbian.statistic, -1])
-# # # correlation_coefficient_table.add_row(["Gridwise 2 (P3)", P3_Hebbian.statistic, -1])
-
-# # # print(correlation_coefficient_table)
