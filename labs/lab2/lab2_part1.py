@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from random import randint
-from sklearn.preprocessing import normalize
-from scipy.stats import pearsonr
 from prettytable import PrettyTable
+from random import randint
+from scipy.stats import pearsonr
+from sklearn.preprocessing import normalize
 
 
 """ Setup """
