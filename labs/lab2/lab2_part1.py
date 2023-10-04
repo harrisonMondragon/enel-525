@@ -114,6 +114,7 @@ hebbian_table.add_row(["Pattern 1", h_corr11, h_corr12, h_corr13])
 hebbian_table.add_row(["Pattern 2", h_corr21, h_corr22, h_corr23])
 hebbian_table.add_row(["Pattern 3", h_corr31, h_corr32, h_corr33])
 
+print("Hebbian correlation coefficient table")
 print(hebbian_table)
 
 # Pseudo inverse correlation coefficient table
@@ -136,8 +137,8 @@ pseudo_inverse_table.add_row(["Pattern 1", pi_corr11, pi_corr12, pi_corr13])
 pseudo_inverse_table.add_row(["Pattern 2", pi_corr21, pi_corr22, pi_corr23])
 pseudo_inverse_table.add_row(["Pattern 3", pi_corr31, pi_corr32, pi_corr33])
 
+print("Pseudo inverse correlation coefficient table:")
 print(pseudo_inverse_table)
-
 
 """ Plotting """
 
