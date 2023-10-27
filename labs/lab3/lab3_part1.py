@@ -7,18 +7,15 @@ def mse(array):
     return np.mean(array.flatten() ** 2)
 
 # T and P values, T values were arbitraily assigned per class
-p_array = np.array([[1,1],[1,2],[2,-1],[2,0],[-1,2],[-2,1],[-1,-1],[-2,-2]])
-t_array = np.array([[-1,-1],[-1,-1],[-1,1],[-1,1],[1,-1],[1,-1],[1,1],[1,1]])
+p_array = np.array([[1,1],[1,2],[2,-1],[2,0],[-1,2],[-2,1],[-1,-1],[-2,-2]]).T
+t_array = np.array([[-1,-1],[-1,-1],[-1,1],[-1,1],[1,-1],[1,-1],[1,1],[1,1]]).T
 
 # Initial weights and baiases
-W = np.array([[1,0],[0,1]])
-b = np.array([1,1])
+W = np.zeros((2,2))
+b = np.zeros((2,1))
 
 # Learing rate
-alpha = 0.04
-
-# Error array to fill per iteration to create the input for the mse function
-mse_input = np.array([[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]])
+alpha = 0.01
 
 # Error variable to hold the current iteration's mse
 mse_value = 999
@@ -26,19 +23,22 @@ mse_value = 999
 # List that holds all error values intill the error threshold has been acheived
 mse_list = []
 
-while mse_value >= 4.4376:
+# for number in range(100):
+while mse_value > 0.02:
+    errors = []
     for i in range(len(p_array)):
-        error = t_array[i] - (np.matmul(W, p_array[i]) + b)
+        a = np.dot(W, p_array[:, [i]]) + b
+        error = t_array[:, [i]] - a
 
-        W = W + 2 * alpha * np.matmul(error, p_array[i].T)
+        W = W + 2 * alpha * np.dot(error, p_array[:, [i]].T)
         b = b + 2 * alpha * error
 
-        mse_input[i] = error
+        errors.append(error)
 
-    mse_value = mse(mse_input)
+    mse_value = mse(np.array(errors))
     mse_list.append(mse_value)
 
-print(mse_list)
+# print(mse_list)
 
 plt.semilogy(mse_list)
 plt.xlabel("Iteration")
@@ -46,44 +46,51 @@ plt.ylabel("MSE Value")
 plt.show()
 
 trained_list = []
-for j in range(len(p_array)):
-    trained_list.append(np.matmul(W, p_array[j]) + b)
+for i in range(len(p_array[0])):
+    trained_list.append(np.dot(W, p_array[:, [i]]) + b)
+print(f"trained list {trained_list}")
 
-mse11 = mse(t_array[0]-trained_list[0])
-mse12 = mse(t_array[0]-trained_list[1])
-mse13 = mse(t_array[0]-trained_list[2])
-mse14 = mse(t_array[0]-trained_list[3])
-mse15 = mse(t_array[0]-trained_list[4])
-mse16 = mse(t_array[0]-trained_list[5])
-mse17 = mse(t_array[0]-trained_list[6])
-mse18 = mse(t_array[0]-trained_list[7])
+# print(t_array[:, [0]])
+# print(t_array[:, [2]])
+# print(t_array[:, [4]])
+# print(t_array[:, [6]])
 
-mse21 = mse(t_array[2]-trained_list[0])
-mse22 = mse(t_array[2]-trained_list[1])
-mse23 = mse(t_array[2]-trained_list[2])
-mse24 = mse(t_array[2]-trained_list[3])
-mse25 = mse(t_array[2]-trained_list[4])
-mse26 = mse(t_array[2]-trained_list[5])
-mse27 = mse(t_array[2]-trained_list[6])
-mse28 = mse(t_array[2]-trained_list[7])
 
-mse31 = mse(t_array[4]-trained_list[0])
-mse32 = mse(t_array[4]-trained_list[1])
-mse33 = mse(t_array[4]-trained_list[2])
-mse34 = mse(t_array[4]-trained_list[3])
-mse35 = mse(t_array[4]-trained_list[4])
-mse36 = mse(t_array[4]-trained_list[5])
-mse37 = mse(t_array[4]-trained_list[6])
-mse38 = mse(t_array[4]-trained_list[7])
+mse11 = round(mse(t_array[:, [0]]-trained_list[0]),6)
+mse12 = round(mse(t_array[:, [0]]-trained_list[1]),6)
+mse13 = round(mse(t_array[:, [0]]-trained_list[2]),6)
+mse14 = round(mse(t_array[:, [0]]-trained_list[3]),6)
+mse15 = round(mse(t_array[:, [0]]-trained_list[4]),6)
+mse16 = round(mse(t_array[:, [0]]-trained_list[5]),6)
+mse17 = round(mse(t_array[:, [0]]-trained_list[6]),6)
+mse18 = round(mse(t_array[:, [0]]-trained_list[7]),6)
 
-mse41 = mse(t_array[6]-trained_list[0])
-mse42 = mse(t_array[6]-trained_list[1])
-mse43 = mse(t_array[6]-trained_list[2])
-mse44 = mse(t_array[6]-trained_list[3])
-mse45 = mse(t_array[6]-trained_list[4])
-mse46 = mse(t_array[6]-trained_list[5])
-mse47 = mse(t_array[6]-trained_list[6])
-mse48 = mse(t_array[6]-trained_list[7])
+mse21 = round(mse(t_array[:, [2]]-trained_list[0]),6)
+mse22 = round(mse(t_array[:, [2]]-trained_list[1]),6)
+mse23 = round(mse(t_array[:, [2]]-trained_list[2]),6)
+mse24 = round(mse(t_array[:, [2]]-trained_list[3]),6)
+mse25 = round(mse(t_array[:, [2]]-trained_list[4]),6)
+mse26 = round(mse(t_array[:, [2]]-trained_list[5]),6)
+mse27 = round(mse(t_array[:, [2]]-trained_list[6]),6)
+mse28 = round(mse(t_array[:, [2]]-trained_list[7]),6)
+
+mse31 = round(mse(t_array[:, [4]]-trained_list[0]),6)
+mse32 = round(mse(t_array[:, [4]]-trained_list[1]),6)
+mse33 = round(mse(t_array[:, [4]]-trained_list[2]),6)
+mse34 = round(mse(t_array[:, [4]]-trained_list[3]),6)
+mse35 = round(mse(t_array[:, [4]]-trained_list[4]),6)
+mse36 = round(mse(t_array[:, [4]]-trained_list[5]),6)
+mse37 = round(mse(t_array[:, [4]]-trained_list[6]),6)
+mse38 = round(mse(t_array[:, [4]]-trained_list[7]),6)
+
+mse41 = round(mse(t_array[:, [6]]-trained_list[0]),6)
+mse42 = round(mse(t_array[:, [6]]-trained_list[1]),6)
+mse43 = round(mse(t_array[:, [6]]-trained_list[2]),6)
+mse44 = round(mse(t_array[:, [6]]-trained_list[3]),6)
+mse45 = round(mse(t_array[:, [6]]-trained_list[4]),6)
+mse46 = round(mse(t_array[:, [6]]-trained_list[5]),6)
+mse47 = round(mse(t_array[:, [6]]-trained_list[6]),6)
+mse48 = round(mse(t_array[:, [6]]-trained_list[7]),6)
 
 mse_table = PrettyTable()
 mse_table.field_names = ["", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8"]
