@@ -47,6 +47,9 @@ input_list = [  img1, img2, img3, img4, img5, img6, img7,
 t_list = [Tx.reshape(400,1) for Tx in input_list]
 p_list = [normalize(Px) for Px in t_list]
 
+t_list = np.array(t_list)
+p_list = np.array(p_list)
+
 # print(f"t_list[0].shape {t_list[0].shape}")
 
 # Initial weight and baias
@@ -63,7 +66,7 @@ mse_value = 999
 mse_list = []
 
 # "MSE" loop
-for number in range(200):
+for number in range(300):
 # while mse_value > 0.00001:
     errors = []
 
@@ -94,14 +97,21 @@ plt.ylabel("MSE Value")
 plt.show()
 
 # Calculate outputs using trained weight and bias
-trained_list = [W.dot(Px) + b for Px in p_list]
+trained_list = []
+for i in range(len(p_list)):
+    a = W.dot(p_list[i]) + b
+    trained_list.append(a)
+trained_list = np.array(trained_list)
+
+t_list = np.squeeze(t_list)
+trained_list = np.squeeze(trained_list)
 
 # Calculate correlations
 corr_table = PrettyTable()
 for i in range(len(t_list)):
     column_list = []
     for j in range(len(trained_list)):
-        column_list.append(pearsonr(t_list[i], trained_list[j]).statistic)
+        column_list.append(pearsonr(t_list[i, :], trained_list[j, :]).statistic)
 
     corr_table.add_column(f"Input{i}", column_list)
 
