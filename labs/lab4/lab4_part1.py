@@ -25,7 +25,7 @@ alpha = 0.01
 error_threshold = 0.015
 
 # Error variable to hold the current iteration's mse
-mse_value = 999
+mse_value = 0.5
 
 # List that holds all error values until the error threshold has been acheived
 mse_list = []
@@ -92,10 +92,12 @@ plt.show()
 
 # Compare predicted and true values
 predicted_values = []
-g = 190
-while g < 200:
+g = 189
+while g < 199:
     # Get p from previous 2 points, p = a0
-    a0 = np.array(np.array([[data_sequence[g-1]],[data_sequence[g-2]]]))
+    # a0 = np.array(np.array([[data_sequence[g-1]],[data_sequence[g-2]]]))
+
+    a0 = np.array(np.array([[data_sequence[g]],[data_sequence[g-1]]]))
 
     # Calculate a1
     a1 = W1.dot(a0) + b1
@@ -106,11 +108,20 @@ while g < 200:
     a2 = W2.dot(a1) + b2
     predicted_values.append(a2[0][0])
 
+    # print("\n point: ", g+1, )
+
     g += 1
 
 true_values = data_sequence[190:]
 
+# Table format
 display_table = PrettyTable()
 display_table.add_column("Predicted", predicted_values)
 display_table.add_column("True", true_values)
 print(display_table)
+
+# Plot format
+plt.figure("ahh")
+plt.plot(predicted_values)
+plt.plot(true_values)
+plt.show()
