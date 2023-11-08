@@ -7,11 +7,7 @@ def mse(array):
     return np.mean(array.flatten() ** 2)
 
 # Creating the data sequence
-data_sequence = [0.35]
-pn = 0.35
-for n in range(199):
-    pn = 4*pn * (1-pn)
-    data_sequence.append(pn)
+data_sequence = np.load(r"data1.npy")
 
 # Initial weight and baias
 W1 = np.random.normal(size=(5, 2))
@@ -21,8 +17,8 @@ W2 = np.random.normal(size=(1, 5))
 b2 = np.random.normal(size=(1, 1))
 
 # Learing rate and error threshold
-alpha = 0.01
-error_threshold = 0.015
+alpha = 0.05
+error_threshold = 0.00002
 
 # Error variable to hold the current iteration's mse
 mse_value = 0.5
@@ -36,10 +32,10 @@ while mse_value > error_threshold:
 
     i = 1
 
-    while i < 189:
+    while i < 169:
 
         # Get p from previous 2 points, p = a0
-        a0 = np.array(np.array([[data_sequence[i]],[data_sequence[i-1]]]))
+        a0 = np.array(np.array([data_sequence[i],data_sequence[i-1]]))
 
         # Calculate a1
         a1 = W1.dot(a0) + b1
@@ -72,7 +68,7 @@ while mse_value > error_threshold:
 
         i += 1
 
-    # Calculate mse and add it to the mse list
+    # # Calculate mse and add it to the mse list
     mse_value = mse(np.array(errors))
     mse_list.append(mse_value)
 
@@ -90,10 +86,10 @@ plt.show()
 
 # Compare predicted and true values
 predicted_values = []
-g = 189
-while g < 199:
-
-    a0 = np.array(np.array([[data_sequence[g]],[data_sequence[g-1]]]))
+g = 169
+while g < 179:
+    # Get p from previous 2 points, p = a0
+    a0 = np.array(np.array([data_sequence[g],data_sequence[g-1]]))
 
     # Calculate a1
     a1 = W1.dot(a0) + b1
@@ -106,7 +102,7 @@ while g < 199:
 
     g += 1
 
-true_values = data_sequence[190:]
+true_values = data_sequence[170:]
 
 # Table format
 display_table = PrettyTable()
