@@ -16,7 +16,11 @@ target_2 = np.ones(1000)
 targets_array = np.concatenate((target_1, target_2), axis=0)
 
 # Scatter plot
-plt.scatter(dataset_array[:,0],dataset_array[:,1],c=targets_array)
+classes = ["Adults", "Children"]
+
+scatter_plot = plt.scatter(dataset_array[:,0],dataset_array[:,1],c=targets_array)
+
+plt.legend(handles=scatter_plot.legend_elements()[0], labels=classes)
 plt.title("Lesson 1 Exercise 3 Dataset")
 plt.xlabel("Height (cm)")
 plt.ylabel("Weight (kg)")
