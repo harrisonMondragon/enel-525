@@ -18,9 +18,9 @@ targets = pd.read_csv("Targets_0.csv")
 dataset = dataset.to_numpy()
 targets = targets.to_numpy()
 
-# Get rid of 'indices' take class 0 and class 1 only for Exercise 1 (2000 data points)
-dataset = dataset[0:2000,1:] # Taking column index 1 and 2 only
-targets = targets[0:2000,1] # Taking column index 1 only
+# Get rid of 'indices' take all classes for Exercise 2
+dataset = dataset[0:4000,1:] # Taking column index 1 and 2 only
+targets = targets[0:4000,1] # Taking column index 1 only
 
 # Plotting the dataset in a scatter plot
 plt.scatter(dataset[:,0], dataset[:,1], c=targets)
@@ -34,10 +34,11 @@ plt.show()
 # Split dataset into train and test subsets
 np.random.seed(seed=0) # Set a seed for repeatability
 permuted_idx = np.random.permutation(dataset.shape[0]) # Permute sequence of the dataset
-x_train = dataset[permuted_idx[0:1600]]
-y_train = targets[permuted_idx[0:1600]]
-x_test = dataset[permuted_idx[1600:]]
-y_test = targets[permuted_idx[1600:]]
+x_train = dataset[permuted_idx[0:3200]]
+y_train = targets[permuted_idx[0:3200]]
+y_train = tf.one_hot(y_train, 4) # Convert to one hot encoding
+x_test = dataset[permuted_idx[3200:]]
+y_test = targets[permuted_idx[3200:]]
 
 print(f"Number of datapoints in x_train: {len(x_train)}")
 print(f"Number of datapoints in x_test: {len(x_test)}")
@@ -47,14 +48,21 @@ print(f"Dataset shape: {dataset.shape}")
 model = tf.keras.Sequential()
 model.add(tf.keras.layers.Dense(50, activation='sigmoid'))
 model.add(tf.keras.layers.Dense(50, activation='sigmoid'))
-model.add(tf.keras.layers.Dense(1, activation='sigmoid')) # Binary classification sigmoid
-model.compile(optimizer='adam', loss='binary_crossentropy')
-history = model.fit(x_train, y_train, batch_size=24, epochs=100)
+model.add(tf.keras.layers.Dense(4, activation='softmax')) # Categorical classification softmax
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+history = model.fit(x_train, y_train, validation_split=0.2, batch_size=24, epochs=100)
 
 model.summary() # View model summary
 y_pred = model.predict(x_test) # Test the model using test data
-y_pred_t = 1 * (y_pred > 0.5) # Computing predicted test labels/targets (Threshold at 0.5)
-y_pred_t = y_pred_t.astype(int) # Converting to integer
+y_pred = np.argmax(y_pred, axis=1) # Decode from tf.on_hot to original
+print(f"y_pred: {y_pred}")
+
+################## This logic needs to be changed ###################
+
+# y_pred_t = 1 * (y_pred > 0.5) # Computing predicted test labels/targets (Threshold at 0.5)
+# y_pred_t = y_pred_t.astype(int) # Converting to integer
+
+#####################################################################
 
 # Compute and view the confusion matrix
 confusion_mx = compute_confusion_matrix(y_test, y_pred_t)
