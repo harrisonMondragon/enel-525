@@ -34,22 +34,22 @@ plt.show()
 # Split dataset into train and test subsets
 np.random.seed(seed=0) # Set a seed for repeatability
 permuted_idx = np.random.permutation(dataset.shape[0]) # Permute sequence of the dataset
-x_train = dataset[permuted_idx[0,1600]]
-y_train = targets[permuted_idx[0,1600]]
+x_train = dataset[permuted_idx[0:1600]]
+y_train = targets[permuted_idx[0:1600]]
 x_test = dataset[permuted_idx[1600:]]
-y_test = dataset[permuted_idx[1600:]]
+y_test = targets[permuted_idx[1600:]]
 
 print(f"Number of datapoints in x_train: {len(x_train)}")
 print(f"Number of datapoints in x_test: {len(x_test)}")
 print(f"Dataset shape: {dataset.shape}")
 
 # Build, compile, and train neural network
-model = tf.keras.sequential()
+model = tf.keras.Sequential()
 model.add(tf.keras.layers.Dense(50, activation='sigmoid'))
 model.add(tf.keras.layers.Dense(50, activation='sigmoid'))
 model.add(tf.keras.layers.Dense(1, activation='sigmoid')) # Binary classification sigmoid
 model.compile(optimizer='adam', loss='binary_crossentropy')
-history = model.fit(x_train, y_train, match_size=24, epochs=100)
+history = model.fit(x_train, y_train, batch_size=24, epochs=100)
 
 model.summary() # View model summary
 y_pred = model.predict(x_test) # Test the model using test data
