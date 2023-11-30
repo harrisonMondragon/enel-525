@@ -54,14 +54,11 @@ history = model.fit(x_train, y_train, validation_split=0.2, batch_size=24, epoch
 
 model.summary() # View model summary
 y_pred = model.predict(x_test) # Test the model using test data
-y_pred = np.argmax(y_pred, axis=1) # Decode from tf.on_hot to original
-print(f"y_pred: {y_pred}")
+y_pred_t = np.argmax(y_pred, axis=1) # Decode from tf.on_hot to original
 
 ################## This logic needs to be changed ###################
-
 # y_pred_t = 1 * (y_pred > 0.5) # Computing predicted test labels/targets (Threshold at 0.5)
 # y_pred_t = y_pred_t.astype(int) # Converting to integer
-
 #####################################################################
 
 # Compute and view the confusion matrix
@@ -69,5 +66,6 @@ confusion_mx = compute_confusion_matrix(y_test, y_pred_t)
 print(confusion_mx)
 
 # Compute accuracy
-Accuracy = ((confusion_mx[0,0] + confusion_mx[1,1]) / len(y_test)) * 100
+Accuracy = (np.sum(np.diag(confusion_mx)) / len(y_test)) * 100
+# Accuracy = ((confusion_mx[0,0] + confusion_mx[1,1]) / len(y_test)) * 100
 print(f"Accuracy: {Accuracy} %")
