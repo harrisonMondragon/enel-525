@@ -1,15 +1,12 @@
-################################################################################
-###################      ChatGPT Code - FULLY UNTESTED      ####################
-################################################################################
-
-import tensorflow as tf
-from tensorflow.keras import layers, models
+from tensorflow.keras import layers, models, preprocessing
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 
 # Set the path to your dataset
-dataset_path = 'flowers'
+dataset_path = 'smaller_flowers'
 
 # Get the list of class names (assuming each subdirectory is a class)
 class_names = sorted(os.listdir(dataset_path))
@@ -57,8 +54,8 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Data preprocessing using ImageDataGenerator with resizing
-datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2, 
-                             width_shift_range=0.2, height_shift_range=0.2, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
+datagen = ImageDataGenerator(rescale=1./255)
+# datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
 
 # Create generators for training, validation, and test sets
 train_generator = datagen.flow_from_directory(
