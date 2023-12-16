@@ -1,96 +1,119 @@
 from tensorflow.keras import layers, models, preprocessing
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os
 
-# Set the path to your dataset
-dataset_path = 'smaller_flowers'
-
-# Get the list of class names (assuming each subdirectory is a class)
-class_names = sorted(os.listdir(dataset_path))
-
-# Create a dictionary to store file paths for each class
-class_files = {class_name: [] for class_name in class_names}
-
-# Populate the dictionary with file paths
-for class_name in class_names:
-    class_path = os.path.join(dataset_path, class_name)
-    class_files[class_name] = [os.path.join(class_path, file) for file in os.listdir(class_path)]
-
-# Split the dataset into training, validation, and test sets
-train_files, test_files = train_test_split(list(class_files.values()), test_size=0.3, random_state=42)
-valid_files, test_files = train_test_split(test_files, test_size=0.5, random_state=42)
+# Set the path to dataset, please use an absolute path
+dataset_path = 'C:\\Users\\Harry\\Desktop\\ENEL525\\enel-525\\project\\final\\smaller_flowers'
 
 # Define the image dimensions
-img_width, img_height = 320, 240
+img_width = 320
+img_height = 240
 input_shape = (img_width, img_height, 3)  # 3 channels for RGB images
 
 # Define the batch size and number of epochs
 batch_size = 32
 epochs = 10
 
-# Create a CNN model
-model = models.Sequential()
+# Create a list of all image paths and labels
+image_paths = []
+labels = []
 
-model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
-model.add(layers.MaxPooling2D((2, 2)))
+for class_folder in os.listdir(dataset_path):
+    class_folder_path = os.path.join(dataset_path, class_folder)
 
-model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2, 2)))
+    if os.path.isdir(class_folder_path):
+        # Construct image paths for the class
+        class_image_paths = [os.path.join(class_folder_path, image) for image in os.listdir(class_folder_path)]
 
-model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-model.add(layers.MaxPooling2D((2, 2)))
+        image_paths.extend(class_image_paths)
+        labels.extend([class_folder] * len(class_image_paths))
 
-model.add(layers.Flatten())
-model.add(layers.Dense(256, activation='relu'))
-model.add(layers.Dropout(0.5))
-model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for the number of classes
+# Convert lists to numpy arrays
+image_paths = np.array(image_paths)
+labels = np.array(labels)
 
-# Compile the model
-model.compile(optimizer='adam',
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
+# Shuffle the data
+indices = np.arange(len(image_paths))
+np.random.shuffle(indices)
+image_paths = image_paths[indices]
+labels = labels[indices]
 
-# Data preprocessing using ImageDataGenerator with resizing
+# Manually split the data into training, validation, and test sets
+split_index_train = int(len(image_paths) * 0.7)
+split_index_val = split_index_train + int(len(image_paths) * 0.15)
+
+train_images = image_paths[:split_index_train]
+train_labels = labels[:split_index_train]
+
+val_images = image_paths[split_index_train:split_index_val]
+val_labels = labels[split_index_train:split_index_val]
+
+test_images = image_paths[split_index_val:]
+test_labels = labels[split_index_val:]
+
+# Use ImageDataGenerator to create data generators with normalization for each set
 datagen = ImageDataGenerator(rescale=1./255)
-# datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2, width_shift_range=0.2, height_shift_range=0.2, shear_range=0.2, zoom_range=0.2, horizontal_flip=True)
 
-# Create generators for training, validation, and test sets
-train_generator = datagen.flow_from_directory(
-    dataset_path,
-    target_size=(img_width, img_height),
+# Create data generators for each set
+train_generator = datagen.flow_from_dataframe(
+    dataframe=pd.DataFrame({'filename': train_images, 'class': train_labels}),
+    directory=dataset_path,
+    target_size=(img_height, img_width),
     batch_size=batch_size,
     class_mode='categorical',
-    subset='training'
+    shuffle=True
 )
 
-validation_generator = datagen.flow_from_directory(
-    dataset_path,
-    target_size=(img_width, img_height),
+validation_generator = datagen.flow_from_dataframe(
+    dataframe=pd.DataFrame({'filename': val_images, 'class': val_labels.tolist()}),
+    directory=dataset_path,
+    target_size=(img_height, img_width),
     batch_size=batch_size,
     class_mode='categorical',
-    subset='validation'
+    shuffle=False
 )
 
-test_generator = datagen.flow_from_directory(
-    dataset_path,
-    target_size=(img_width, img_height),
+test_generator = datagen.flow_from_dataframe(
+    dataframe=pd.DataFrame({'filename': test_images, 'class': test_labels.tolist()}),
+    directory=dataset_path,
+    target_size=(img_height, img_width),
     batch_size=batch_size,
     class_mode='categorical',
-    # subset='test'
+    shuffle=False
 )
 
-# Train the model
-history = model.fit(
-    train_generator,
-    steps_per_epoch=train_generator.samples // batch_size,
-    epochs=epochs,
-    validation_data=validation_generator,
-    validation_steps=validation_generator.samples // batch_size
-)
 
-# Evaluate the model on the test set
-test_loss, test_accuracy = model.evaluate(test_generator, steps=test_generator.samples // batch_size)
-print(f'Test Accuracy: {test_accuracy * 100:.2f}%')
+# # Create a CNN model
+# model = models.Sequential()
+
+# model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
+# model.add(layers.MaxPooling2D((2, 2)))
+
+# model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+# model.add(layers.MaxPooling2D((2, 2)))
+
+# model.add(layers.Conv2D(128, (3, 3), activation='relu'))
+# model.add(layers.MaxPooling2D((2, 2)))
+
+# model.add(layers.Flatten())
+# model.add(layers.Dense(256, activation='relu'))
+# model.add(layers.Dropout(0.5))
+# model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for the number of classes
+
+# # Compile the model
+# model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+
+# # Train the model
+# history = model.fit(
+#     train_data,
+#     epochs=5,
+#     validation_data=
+# )
+
+# # Evaluate the model on the test set
+# test_loss, test_accuracy = model.evaluate(test_generator, steps=test_generator.samples // batch_size)
+# print(f'Test Accuracy: {test_accuracy * 100:.2f}%')
