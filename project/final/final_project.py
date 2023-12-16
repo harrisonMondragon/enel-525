@@ -20,8 +20,10 @@ epochs = 10
 # Create a list of all image paths and labels
 image_paths = []
 labels = []
+class_names = []
 
 for class_folder in os.listdir(dataset_path):
+    class_names.append(class_folder)
     class_folder_path = os.path.join(dataset_path, class_folder)
 
     if os.path.isdir(class_folder_path):
@@ -86,34 +88,75 @@ test_generator = datagen.flow_from_dataframe(
 )
 
 
-# # Create a CNN model
-# model = models.Sequential()
+# Create a CNN model
+model = models.Sequential()
 
-# model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
-# model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
+model.add(layers.MaxPooling2D((2, 2)))
 
-# model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-# model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
 
-# model.add(layers.Conv2D(128, (3, 3), activation='relu'))
-# model.add(layers.MaxPooling2D((2, 2)))
+model.add(layers.Conv2D(128, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
 
-# model.add(layers.Flatten())
-# model.add(layers.Dense(256, activation='relu'))
-# model.add(layers.Dropout(0.5))
-# model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for the number of classes
+model.add(layers.Flatten())
+model.add(layers.Dense(256, activation='relu'))
+model.add(layers.Dropout(0.5))
+model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for the number of classes
 
-# # Compile the model
-# model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+# Compile the model
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
 
-# # Train the model
-# history = model.fit(
-#     train_data,
-#     epochs=5,
-#     validation_data=
-# )
+# Train the model
+history = model.fit(
+    train_generator,
+    epochs=epochs,
+    validation_data=validation_generator
+)
 
-# # Evaluate the model on the test set
-# test_loss, test_accuracy = model.evaluate(test_generator, steps=test_generator.samples // batch_size)
-# print(f'Test Accuracy: {test_accuracy * 100:.2f}%')
+# Evaluate the model on the test set
+test_loss, test_accuracy = model.evaluate(test_generator)
+print(f'Test Loss: {test_loss}')
+print(f'Test Accuracy: {test_accuracy}')
+
+
+# # Get predictions for the test set
+# predictions = model.predict(test_generator)
+
+# # Convert predictions to class labels
+# predicted_labels = np.argmax(predictions, axis=1)
+
+# # Get true labels from the test generator
+# true_labels = test_generator.classes
+
+# # Get class indices to class names mapping
+# class_indices = train_generator.class_indices
+# class_names = list(class_indices.keys())
+
+# # Map class indices to class names for true labels
+# true_labels = [class_names[idx] for idx in true_labels]
+
+# # Print true labels and predicted labels side by side
+# for true_label, predicted_label in zip(true_labels, predicted_labels):
+#     print(f'True Label: {true_label}, Predicted Label: {class_names[predicted_label]}')
+
+
+# Plot training loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.title('Training and Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
+plt.show()
+
+# Plot training accuracy
+plt.plot(history.history['accuracy'], label='Training Accuracy')
+plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+plt.title('Training and Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
