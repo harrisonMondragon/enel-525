@@ -6,7 +6,7 @@ import pandas as pd
 import os
 
 # Set the path to dataset, please use an absolute path
-dataset_path = 'C:\\Users\\Harry\\Desktop\\ENEL525\\enel-525\\project\\final\\smaller_flowers'
+dataset_path = 'C:\\Users\\Harry\\Desktop\\ENEL525\\enel-525\\project\\final\\flowers'
 
 # Define the image dimensions
 img_width = 320
@@ -70,7 +70,7 @@ train_generator = datagen.flow_from_dataframe(
 )
 
 validation_generator = datagen.flow_from_dataframe(
-    dataframe=pd.DataFrame({'filename': val_images, 'class': val_labels.tolist()}),
+    dataframe=pd.DataFrame({'filename': val_images, 'class': val_labels}),
     directory=dataset_path,
     target_size=(img_height, img_width),
     batch_size=batch_size,
@@ -79,14 +79,13 @@ validation_generator = datagen.flow_from_dataframe(
 )
 
 test_generator = datagen.flow_from_dataframe(
-    dataframe=pd.DataFrame({'filename': test_images, 'class': test_labels.tolist()}),
+    dataframe=pd.DataFrame({'filename': test_images, 'class': test_labels}),
     directory=dataset_path,
     target_size=(img_height, img_width),
     batch_size=batch_size,
     class_mode='categorical',
     shuffle=False
 )
-
 
 # Create a CNN model
 model = models.Sequential()
@@ -108,7 +107,6 @@ model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for 
 # Compile the model
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 
-
 # Train the model
 history = model.fit(
     train_generator,
@@ -122,25 +120,41 @@ print(f'Test Loss: {test_loss}')
 print(f'Test Accuracy: {test_accuracy}')
 
 
-# # Get predictions for the test set
-# predictions = model.predict(test_generator)
 
-# # Convert predictions to class labels
-# predicted_labels = np.argmax(predictions, axis=1)
 
-# # Get true labels from the test generator
-# true_labels = test_generator.classes
 
-# # Get class indices to class names mapping
-# class_indices = train_generator.class_indices
-# class_names = list(class_indices.keys())
+# Make predictions on the test set
+predictions = model.predict(test_generator)
 
-# # Map class indices to class names for true labels
-# true_labels = [class_names[idx] for idx in true_labels]
+# Get the class indices for each class name
+class_indices = {class_name: i for i, class_name in enumerate(class_names)}
 
-# # Print true labels and predicted labels side by side
-# for true_label, predicted_label in zip(true_labels, predicted_labels):
-#     print(f'True Label: {true_label}, Predicted Label: {class_names[predicted_label]}')
+# Display the first 10 images from the test set along with true and predicted labels
+num_images_to_display = 10
+
+for i in range(num_images_to_display):
+    # Get the true class label
+    true_label_index = np.argmax(test_labels[i])
+    true_label = class_names[true_label_index]
+
+    # Get the predicted class label
+    predicted_label_index = np.argmax(predictions[i])
+    predicted_label = class_names[predicted_label_index]
+
+    # Load and display the image
+    img_path = os.path.join(dataset_path, test_images[i])
+    img = preprocessing.image.load_img(img_path, target_size=(img_height, img_width))
+    img_array = preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0)
+    img_array /= 255.0  # Normalize the pixel values to be between 0 and 1
+
+    # Display the image
+    plt.imshow(img_array[0])
+    plt.title(f'True: {true_label}, Predicted: {predicted_label}')
+    plt.show()
+
+
+
 
 
 # Plot training loss
