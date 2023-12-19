@@ -106,6 +106,7 @@ model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for 
 
 # Compile the model
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+model.summary()
 
 # Train the model
 history = model.fit(
@@ -118,44 +119,6 @@ history = model.fit(
 test_loss, test_accuracy = model.evaluate(test_generator)
 print(f'Test Loss: {test_loss}')
 print(f'Test Accuracy: {test_accuracy}')
-
-
-
-
-
-# Make predictions on the test set
-predictions = model.predict(test_generator)
-
-# Get the class indices for each class name
-class_indices = {class_name: i for i, class_name in enumerate(class_names)}
-
-# Display the first 10 images from the test set along with true and predicted labels
-num_images_to_display = 10
-
-for i in range(num_images_to_display):
-    # Get the true class label
-    true_label_index = np.argmax(test_labels[i])
-    true_label = class_names[true_label_index]
-
-    # Get the predicted class label
-    predicted_label_index = np.argmax(predictions[i])
-    predicted_label = class_names[predicted_label_index]
-
-    # Load and display the image
-    img_path = os.path.join(dataset_path, test_images[i])
-    img = preprocessing.image.load_img(img_path, target_size=(img_height, img_width))
-    img_array = preprocessing.image.img_to_array(img)
-    img_array = np.expand_dims(img_array, axis=0)
-    img_array /= 255.0  # Normalize the pixel values to be between 0 and 1
-
-    # Display the image
-    plt.imshow(img_array[0])
-    plt.title(f'True: {true_label}, Predicted: {predicted_label}')
-    plt.show()
-
-
-
-
 
 # Plot training loss
 plt.plot(history.history['loss'], label='Training Loss')
@@ -173,4 +136,46 @@ plt.title('Training and Validation Accuracy')
 plt.xlabel('Epochs')
 plt.ylabel('Accuracy')
 plt.legend()
+plt.show()
+
+# Load the first 10 images from the test set
+num_images_to_display = 10
+
+# Map class indices to class names
+class_indices = test_generator.class_indices
+class_names = list(class_indices.keys())
+
+# Lists to store information for all 10 predictions
+true_labels = []
+predicted_labels = []
+images_to_display = []
+
+for i in range(num_images_to_display):
+    # Load and preprocess the image with the correct target size
+    img_path = os.path.join(dataset_path, test_generator.filenames[i])
+    img = preprocessing.image.load_img(img_path, target_size=(img_width, img_height))
+    img_array = preprocessing.image.img_to_array(img)
+    img_array = np.expand_dims(img_array, axis=0) / 255.0
+
+    # Make a prediction
+    prediction = model.predict(img_array)
+
+    # Decode predictions
+    true_label = class_names[test_generator.classes[i]]
+    predicted_label = class_names[np.argmax(prediction)]
+
+    # Collect information for display
+    true_labels.append(true_label)
+    predicted_labels.append(predicted_label)
+    images_to_display.append(img)
+
+# Plot all 10 images and their predictions on the same pyplot window
+plt.figure(figsize=(10, 6))
+for i in range(num_images_to_display):
+    plt.subplot(2, 5, i + 1)
+    plt.imshow(images_to_display[i])
+    plt.title(f'True: {true_labels[i]}\nPredicted: {predicted_labels[i]}')
+    plt.axis('off')
+
+plt.tight_layout()
 plt.show()
