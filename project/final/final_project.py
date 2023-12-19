@@ -17,6 +17,9 @@ input_shape = (img_width, img_height, 3)  # 3 channels for RGB images
 batch_size = 32
 epochs = 10
 
+
+##################### Load in and Organize Data #####################
+
 # Create a list of all image paths and labels
 image_paths = []
 labels = []
@@ -56,6 +59,9 @@ val_labels = labels[split_index_train:split_index_val]
 test_images = image_paths[split_index_val:]
 test_labels = labels[split_index_val:]
 
+
+##################### Preprocess Data #####################
+
 # Use ImageDataGenerator to create data generators with normalization for each set
 datagen = ImageDataGenerator(rescale=1./255)
 
@@ -87,6 +93,9 @@ test_generator = datagen.flow_from_dataframe(
     shuffle=False
 )
 
+
+##################### Create and Compile Model #####################
+
 # Create a CNN model
 model = models.Sequential()
 
@@ -102,11 +111,14 @@ model.add(layers.MaxPooling2D((2, 2)))
 model.add(layers.Flatten())
 model.add(layers.Dense(256, activation='relu'))
 model.add(layers.Dropout(0.5))
-model.add(layers.Dense(len(class_names), activation='softmax'))  # Adjusted for the number of classes
+model.add(layers.Dense(len(class_names), activation='softmax'))
 
 # Compile the model
 model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
 model.summary()
+
+
+##################### Train and Test Model #####################
 
 # Train the model
 history = model.fit(
@@ -119,6 +131,9 @@ history = model.fit(
 test_loss, test_accuracy = model.evaluate(test_generator)
 print(f'Test Loss: {test_loss}')
 print(f'Test Accuracy: {test_accuracy}')
+
+
+##################### Loss and Accuracy Plots #####################
 
 # Plot training loss
 plt.plot(history.history['loss'], label='Training Loss')
@@ -138,6 +153,9 @@ plt.ylabel('Accuracy')
 plt.legend()
 plt.show()
 
+
+##################### Testing Output Sample #####################
+
 # Load the first 10 images from the test set
 num_images_to_display = 10
 
@@ -151,7 +169,7 @@ predicted_labels = []
 images_to_display = []
 
 for i in range(num_images_to_display):
-    # Load and preprocess the image with the correct target size
+    # Load and preprocess the image
     img_path = os.path.join(dataset_path, test_generator.filenames[i])
     img = preprocessing.image.load_img(img_path, target_size=(img_width, img_height))
     img_array = preprocessing.image.img_to_array(img)
@@ -159,17 +177,16 @@ for i in range(num_images_to_display):
 
     # Make a prediction
     prediction = model.predict(img_array)
-
-    # Decode predictions
-    true_label = class_names[test_generator.classes[i]]
     predicted_label = class_names[np.argmax(prediction)]
+
+    true_label = class_names[test_generator.classes[i]]
 
     # Collect information for display
     true_labels.append(true_label)
     predicted_labels.append(predicted_label)
     images_to_display.append(img)
 
-# Plot all 10 images and their predictions on the same pyplot window
+# Plot 10 images and their predictions
 plt.figure(figsize=(10, 6))
 for i in range(num_images_to_display):
     plt.subplot(2, 5, i + 1)
